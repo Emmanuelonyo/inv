@@ -1,0 +1,68 @@
+VERY IMPORTANT NOTICE :PLEASE RIGHT CLICK ON UR .env FILE AND GIVE IT PERMISSON 600 IMMEDITELY AFTER U ENTERED UR DATABASE DETEAILS IN IT, ITS VERY IMPORTANT U DO THIS.
+Installation
+Server Requirements:
+
+*. Ensure your PHP version >= 8.2.0
+
+* .Mysql 5.X
+
+
+Installation Process:
+
+1. Upload and extract the zip file to your website public_html directory or the directory you which to run your site from (sub-directory or sub-domain) in your filemanager
+
+   a - Then Go to Bootstrap folder and edit app.php
+   b - Go to line 18 you will see this ( $app->useEnvironmentPath(dirname(__DIR__, 2) . '/xdb'); ) 
+   c - rename the xdb to something else for example - mysitedb
+
+    
+    
+    
+
+2. Check for xdb folder it has the .env file in it
+
+    Create your DATABASE and USER E.G. DATABASE: db_name, USER: db_user, PASSWORD: ******** .
+    
+   Then Set Your database inside the .env file in xdb folder
+   
+   - Then move the xdb folder outside of our public_html and rename the xdb folder to what you used in instruction 1c
+
+    - give the .env file a permission of 0600
+
+3. Ensure you grant the database user all permissions.
+
+4. Go to your phpmyadmin and upload the database.sql
+
+
+6. Congrats, you are done!
+
+admin url
+https://siteurl/admin/login
+email - admin@mail.com
+password - 123456
+
+For Automatic return of capital u need to run cron job
+
+wget -O--q https://siteurl.com/cron
+
+
+========================================================
+========================================================
+========================================================
+
+
+SECURITY DISCLIAMER:
+Change default admin passwords immediately and monitor wallet 
+activity regularly. We are not responsible for breaches due to
+unaltered settings or infrequent checks.
+
+
+
+
+*********************************************************************
+**** This online INVESTMENT script is for educational purposes only. 
+We are not responsible for any illegal use of this script. ******
+The company is not liable
+for any damages or legal issues from misuse. Users must comply with all laws.
+
+********************************************************************
