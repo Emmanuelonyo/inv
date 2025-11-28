@@ -139,8 +139,18 @@ class InvestmentPlan extends Component
                 // Credit user the plan bonus (calculated as a percentage of invested amount)
                 $giftAmount = 0;
                 if ($plan->gift > 0) {
-                    $giftPercent = floatval($plan->gift);
-                    $giftAmount = round(($giftPercent / 100) * $plan_price, 2);
+                    $bonusPercent = (float) (\App\Models\BonusPercentage::getPercentByPlanId($plan->id) ?? 0);
+                    $percentGift = round(($plan_price * $bonusPercent) / 100, 2);
+                    
+                    // consider any absolute gift stored on the plan
+                    $existingGift = (float) ($plan->gift ?? 0);
+
+                    // combine them (choose additive behavior)
+                    // $giftAmount = $percentGift + $existingGift;
+
+                    // If you prefer to override instead of add, use:
+                    // $giftAmount = $percentGift > 0 ? $percentGift : $existingGift;
+                    $giftAmount = $percentGift ;
 
                     User::where('id', $user->id)
                         ->update([
