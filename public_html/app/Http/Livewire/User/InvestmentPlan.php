@@ -83,37 +83,35 @@ class InvestmentPlan extends Component
 
     public function joinPlan()
     {
-        
-       $growthStart = now();
-
-switch ($plan->increment_interval) {
-    case "Monthly":
-        $growthStart = $growthStart->addDays(25);
-        break;
-    case "Weekly":
-        $growthStart = $growthStart->addDays(6);
-        break;
-    case "Daily":
-        $growthStart = $growthStart->addHours(20);
-        break;
-    case "Hourly":
-        $growthStart = $growthStart->addMinutes(49);
-        break;
-    case "Every 30 Minutes":
-        $growthStart = $growthStart->addMinutes(19);
-        break;
-    default:
-        $growthStart = $growthStart->addMinutes(4);
-        break;
-} 
-        
-        
         sleep(2);
         $this->feedback = 'Please wait';
         //get user
         $user = User::where('id', Auth::user()->id)->first();
         //get plan
         $plan = Plans::where('id', $this->planSelected->id)->first();
+
+        // determine growth start based on plan increment interval (use defined $plan)
+        $growthStart = now();
+        switch ($plan->increment_interval) {
+            case "Monthly":
+                $growthStart = $growthStart->addDays(25);
+                break;
+            case "Weekly":
+                $growthStart = $growthStart->addDays(6);
+                break;
+            case "Daily":
+                $growthStart = $growthStart->addHours(20);
+                break;
+            case "Hourly":
+                $growthStart = $growthStart->addMinutes(49);
+                break;
+            case "Every 30 Minutes":
+                $growthStart = $growthStart->addMinutes(19);
+                break;
+            default:
+                $growthStart = $growthStart->addMinutes(4);
+                break;
+        }
         // setup
         $expiration = explode(" ", $plan->expiration);
         $digit = $expiration[0];
@@ -138,20 +136,23 @@ switch ($plan->increment_interval) {
             if ($user->account_bal < $plan_price) {
                 session()->flash('message', 'Your account is insufficient to purchase this plan. Please make a deposit.');
             } else {
-                // Credit user the plan bonus
+                // Credit user the plan bonus (calculated as a percentage of invested amount)
+                $giftAmount = 0;
                 if ($plan->gift > 0) {
+                    $giftPercent = floatval($plan->gift);
+                    $giftAmount = round(($giftPercent / 100) * $plan_price, 2);
 
                     User::where('id', $user->id)
                         ->update([
-                            'bonus' => $user->bonus + $plan->gift,
-                            'account_bal' => $user->account_bal + $plan->gift,
+                            'bonus' => $user->bonus + $giftAmount,
+                            'account_bal' => $user->account_bal + $giftAmount,
                         ]);
 
                     //create history
                     Tp_Transaction::create([
                         'user' => $user->id,
                         'plan' => $plan->name,
-                        'amount' => $plan->gift,
+                        'amount' => $giftAmount,
                         'type' => "Gift Bonus",
                     ]);
                 }
@@ -224,8 +225,8 @@ switch ($plan->increment_interval) {
                 );
 
                 // If there was a gift bonus, create a notification for that too
-                if ($plan->gift > 0) {
-                    $formattedBonus = $settings->currency . number_format(\App\Models\BonusPercentage::getPercentByPlanId($plan->id));
+                if ($plan->gift > 0 && $giftAmount > 0) {
+                    $formattedBonus = $settings->currency . number_format($giftAmount, 2);
                     $notificationService->createNotification(
                         $user->id,
                         "You received a gift bonus of {$formattedBonus} for purchasing the {$plan->name} plan",
